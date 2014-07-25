@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="../lib/bootstrap/css/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="../ng-grid.css" />
+        <script type="text/javascript" src="../lib/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../lib/jquery-ui-1.9.1.custom.min.js"></script>
+        <script type="text/javascript" src="../lib/angular.js"></script>
+        <script type="text/javascript" src="../lib/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../lib/jquery-ui-1.9.1.custom.min.js"></script>
+        <script type="text/javascript" src="../lib/bootstrap/js/bootstrap.js"></script>
+        <script type="text/javascript" src="../build/ng-grid.debug.js"></script>
+        <script type="text/javascript">
+            angular.module('app', ['ngGrid'])
+            .controller('ctrl', function($scope){
+                
+                console.log($scope);
+
+                $scope.data = [
+                    {
+                        name: 'man',
+                        age: '35',
+                    },
+                    {
+                        name: 'old man',
+                        age: '84',
+                    },
+                ];
+
+                $scope.gridOptions = {
+                    data: 'data',
+                    columnDefs: [
+                        {
+                            field: 'name',
+                            cellTemplate: '<div ng-cell-text>{{row.entity}}</div>',
+                        },
+                    ],
+                }
+
+            })
+            .directive('ngCustomCell', [function(){
+                // Runs during compile
+                return {
+                    // name: '',
+                    // priority: 1,
+                    // terminal: true,
+                    // scope: {}, // {} = isolate, true = child, false/undefined = no change
+                    // controller: function($scope, $element, $attrs, $transclude) {},
+                    require: '^ngCustomRow', // Array = multiple requires, ? = optional, ^ = check parent elements
+                    restrict: 'E', // E = Element, A = Attribute, C = Class, M = Comment
+                    // template: '',
+                    // templateUrl: '',
+                    // replace: true,
+                    transclude: true,
+                    // compile: function(tElement, tAttrs, function transclude(function(scope, cloneLinkingFn){ return function linking(scope, elm, attrs){}})),
+                    link: function($scope, element, attrs, controller, transclude) {
+                        var name = attrs['cellName']
+                        var diplayName = (attrs['cellDisplayName'])?
+                                            attrs['cellDisplayName']:
+                                            attrs['cellName'];
+
+                        controller.addField(name, diplayName);
+                    }
+                };
+            }])
+            .directive('ngCustomRow', [function(){
+                // Runs during compile
+                return {
+                    // name: '',
+                    // priority: 1,
+                    // terminal: true,
+                    // scope: {}, // {} = isolate, true = child, false/undefined = no change
+                    // controller: function($scope, $element, $attrs, $transclude) {},
+                    require: '^ngGrid', // Array = multiple requires, ? = optional, ^ = check parent elements
+                    restrict: 'E', // E = Element, A = Attribute, C = Class, M = Comment
+                    // template: '',
+                    // templateUrl: '',
+                    // replace: true,
+                    // transclude: true,
+                    // compile: function(tElement, tAttrs, function transclude(function(scope, cloneLinkingFn){ return function linking(scope, elm, attrs){}})),
+                    controller: function($scope, $element, $attrs, $transclude){
+
+                        console.log('controller ngCustomRow');
+
+                        $scope.fields = [];
+
+                        this.addField = function(name, displayName, template){
+                            $scope.fields.push({
+                                field: name,
+                                displayName: displayName,
+                                custom: true,
+                            });
+                        };
+                    },
+                    link: {
+                        post: function($scope, iElm, iAttrs, controller) {
+                            
+                            console.log('link function', $scope.fields);
+
+                            controller.addFields($scope.fields);
+
+                        }
+                    } 
+
+
+                    
+                };
+            }]);
+        </script>
+    </head>
+    <body ng-app="app" ng-controller="ctrl" >
+        <div ng-grid="gridOptions" style="height: 1000px" >
+            <ng-custom-row breakpoint="min-width: 480px" >
+                <ng-custom-cell cell-name="name" cell-diplay-name="Name"></ng-custom-cell>
+                <ng-custom-cell cell-name="age" cell-display-name="Age"></ng-custom-cell>
+            </ng-custom-row>
+        </div>
+    </body>
+</html>

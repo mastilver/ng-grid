@@ -1,9 +1,21 @@
 ﻿ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '$sortService', '$domUtilityService', '$utilityService', '$timeout', '$parse', '$http', '$q', function ($compile, $filter, $templateCache, sortService, domUtilityService, $utils, $timeout, $parse, $http, $q) {
     var ngGridDirective = {
         scope: true,
+        controller: function($scope, $attrs){
+
+            console.log('controller ngGrid');
+
+            var options = $scope.$eval($attrs.ngGrid);
+
+            this.addFields = function(fields){
+
+                console.log('adding all fields');
+                options.columnDefs = fields;
+            };
+        },
         compile: function() {
             return {
-                pre: function($scope, iElement, iAttrs) {
+                post: function($scope, iElement, iAttrs) {
                     var $element = $(iElement);
                     var options = $scope.$eval(iAttrs.ngGrid);
                     options.gridDim = new ngDimension({ outerHeight: $($element).height(), outerWidth: $($element).width() });
