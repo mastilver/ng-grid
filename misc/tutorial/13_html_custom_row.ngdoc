@@ -1,0 +1,76 @@
+@ngdoc overview
+@name Tutorial: Custom row template with Html
+@description
+
+
+
+@example
+<example module="app">
+  <file name="app.js">
+
+    angular.module('app', ['ui.grid'])
+    .directive('uiCustomCell', [function(){
+      return {
+        require: '^uiCustomRow',
+        restrict: 'E',
+        transclude: true,
+        link: function($scope, element, attrs, controller, transclude) {
+          var name = attrs['cellName']
+          var diplayName = (attrs['cellDisplayName'])?
+                            attrs['cellDisplayName']:
+                            attrs['cellName'];
+
+          controller.addField(name, diplayName);
+        }
+      };
+    }])
+
+    .directive('uiCustomRow', [function(){
+      return {
+        require: '^uiGrid',
+        restrict: 'E',
+        controller: function($scope, $element, $attrs, $transclude){
+
+          $scope.fields = [];
+
+          this.addField = function(name, displayName, template){
+            $scope.fields.push({
+              field: name,
+              displayName: displayName,
+              custom: true,
+            });
+          };
+        },
+        link: {
+          post: function($scope, iElm, iAttrs, controller) {
+
+            if($scope.fields.length > 0)
+              controller.grid.options.columnDefs = $scope.fields;
+          }
+        }
+      };
+    }])
+
+
+    .controller('ctrl', function($scope, $http){
+
+      $scope.gridOptions = {};
+
+      $http.get('/data/100.json')
+      .success(function(data) {
+        $scope.gridOptions.data = data;
+      });
+    });
+
+  </file>
+  <file name="index.html">
+    <div ng-controller="ctrl">
+      <div ui-grid="gridOptions" style="height: 1000px">
+        <ui-custom-row >
+          <ui-custom-cell cell-name="name" cell-diplay-name="Name"></ui-custom-cell>
+          <ui-custom-cell cell-name="gender" cell-display-name="M/F"></ui-custom-cell>
+        </ui-custom-row>
+      </div>
+    </div>
+  </file>
+</example>
