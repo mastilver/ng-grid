@@ -80,7 +80,9 @@
 
           </ui-custom-cell>
           <ui-custom-cell cell-name="gender" cell-display-name="M/F">
-            N/A
+            <span ng-style="COL_FIELD == 'female' && {color: 'pink'} || {color: 'blue'}">
+              {{ COL_FIELD }}
+            </span>
           </ui-custom-cell>
         </ui-custom-row>
       </div>
