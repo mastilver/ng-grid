@@ -24,12 +24,7 @@
               template = cellTemplate;
           });
 
-          var name = attrs['cellName']
-          var diplayName = (attrs['cellDisplayName'])?
-                            attrs['cellDisplayName']:
-                            attrs['cellName'];
-
-          controller.addField(name, diplayName, template);
+          controller.addField(attrs.uiCellTitle, template);
         }
       };
     }])
@@ -41,10 +36,11 @@
         controller: function($scope, $element, $attrs, $transclude){
 
           $scope.fields = [];
+          var customNameId = 0;
 
-          this.addField = function(name, displayName, template){
+          this.addField = function(displayName, template){
             $scope.fields.push({
-              field: name,
+              field: 'custom' + (customNameId++),
               displayName: displayName,
               cellTemplate: template,
             });
@@ -76,12 +72,12 @@
     <div ng-controller="ctrl">
       <div ui-grid="gridOptions" style="height: 1000px">
         <ui-custom-row >
-          <ui-custom-cell cell-name="name" cell-diplay-name="Name">
-
+          <ui-custom-cell ui-cell-title="Name">
+            {{ row.entity.name }}
           </ui-custom-cell>
-          <ui-custom-cell cell-name="gender" cell-display-name="M/F">
-            <span ng-style="COL_FIELD == 'female' && {color: 'pink'} || {color: 'blue'}">
-              {{ COL_FIELD }}
+          <ui-custom-cell ui-cell-title="M/F">
+            <span ng-style="(row.entity.gender == 'female')? {color: 'pink'}: {color: 'blue'}">
+              {{ row.entity.name }} is working for {{ row.entity.company }}
             </span>
           </ui-custom-cell>
         </ui-custom-row>
