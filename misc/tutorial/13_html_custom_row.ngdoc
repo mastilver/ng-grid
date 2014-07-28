@@ -15,12 +15,21 @@
         restrict: 'E',
         transclude: true,
         link: function($scope, element, attrs, controller, transclude) {
+          var template = false;
+
+          transclude(function(clone,scope){
+            var cellTemplate = angular.element('<div>').append(clone).html().trim();
+
+            if(cellTemplate.length > 0)
+              template = cellTemplate;
+          });
+
           var name = attrs['cellName']
           var diplayName = (attrs['cellDisplayName'])?
                             attrs['cellDisplayName']:
                             attrs['cellName'];
 
-          controller.addField(name, diplayName);
+          controller.addField(name, diplayName, template);
         }
       };
     }])
@@ -37,7 +46,7 @@
             $scope.fields.push({
               field: name,
               displayName: displayName,
-              custom: true,
+              cellTemplate: template,
             });
           };
         },
@@ -67,8 +76,12 @@
     <div ng-controller="ctrl">
       <div ui-grid="gridOptions" style="height: 1000px">
         <ui-custom-row >
-          <ui-custom-cell cell-name="name" cell-diplay-name="Name"></ui-custom-cell>
-          <ui-custom-cell cell-name="gender" cell-display-name="M/F"></ui-custom-cell>
+          <ui-custom-cell cell-name="name" cell-diplay-name="Name">
+
+          </ui-custom-cell>
+          <ui-custom-cell cell-name="gender" cell-display-name="M/F">
+            N/A
+          </ui-custom-cell>
         </ui-custom-row>
       </div>
     </div>
