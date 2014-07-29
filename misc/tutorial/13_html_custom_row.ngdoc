@@ -29,7 +29,7 @@
       };
     }])
 
-    .directive('uiCustomRow', [function(){
+    .directive('uiCustomRow', ['$q', '$compile', function($q, $compile){
       return {
         require: '^uiGrid',
         restrict: 'E',
@@ -47,10 +47,21 @@
           };
         },
         link: {
-          post: function($scope, iElm, iAttrs, controller) {
+          post: function($scope, element, attrs, controller, transclude) {
 
-            if($scope.fields.length > 0)
+            if($scope.fields.length > 0){
               controller.grid.options.columnDefs = $scope.fields;
+            }
+            else{
+
+              var deferred  = $q.defer();
+              var rowTemplate = element.html().trim();
+
+              if(rowTemplate.length > 0){
+                controller.grid.getRowTemplateFn = deferred.promise;
+                deferred.resolve($compile(rowTemplate));
+              }
+            }
           }
         }
       };
@@ -71,7 +82,8 @@
   <file name="index.html">
     <div ng-controller="ctrl">
       <div ui-grid="gridOptions" style="height: 1000px">
-        <ui-custom-row >
+
+        <ui-custom-row ng-if="true">
           <ui-custom-cell ui-cell-title="Name">
             {{ row.entity.name }}
           </ui-custom-cell>
@@ -80,6 +92,10 @@
               {{ row.entity.name }} is working for {{ row.entity.company }}
             </span>
           </ui-custom-cell>
+        </ui-custom-row>
+
+        <ui-custom-row ng-if="false">
+          <p>{{ row.entity.name }}!!</p>
         </ui-custom-row>
       </div>
     </div>
