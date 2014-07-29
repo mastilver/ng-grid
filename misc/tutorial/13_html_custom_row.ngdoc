@@ -21,10 +21,10 @@
             var cellTemplate = angular.element('<div>').append(clone).html().trim();
 
             if(cellTemplate.length > 0)
-              template = cellTemplate.replace(/\$row/mg, 'row.entity');
+              template = cellTemplate;
           });
 
-          controller.addField(attrs.uiCellTitle, template);
+          controller.addField(attrs.uiCustomCellTitle, template);
         }
       };
     }])
@@ -33,6 +33,9 @@
       return {
         require: '^uiGrid',
         restrict: 'E',
+        scope: {
+          show: '=uiCustomRowShow',
+        },
         controller: function($scope, $element, $attrs, $transclude){
 
           $scope.fields = [];
@@ -46,24 +49,45 @@
             });
           };
         },
-        link: {
-          post: function($scope, element, attrs, controller, transclude) {
+        compile:function(element, attrs){
 
-            if($scope.fields.length > 0){
-              controller.grid.options.columnDefs = $scope.fields;
-            }
-            else{
+          var rowTemplate = element.html().replace(/\$row/mg, 'row.entity')
+          element.contents().remove();
 
-              var deferred  = $q.defer();
-              var rowTemplate = element.html().trim();
+          var compiledTemplate = $compile(rowTemplate);
 
-              if(rowTemplate.length > 0){
-                controller.grid.getRowTemplateFn = deferred.promise;
-                deferred.resolve($compile(rowTemplate.replace(/\$row/mg, 'row.entity')));
-              }
-            }
+          if(rowTemplate.indexOf('<ui-custom-cell') !== -1){
+            element.append(rowTemplate);
           }
-        }
+
+          return function($scope, element, attrs, controller, transclude) {
+
+            if(typeof $scope.show === 'undefined')
+              $scope.show = true;
+
+
+            $scope.$watch('show', function(show){
+
+              console.log('show value', show);
+
+              if(!show) return;
+
+              if($scope.fields.length > 0){
+                console.log('column def');
+                controller.grid.options.columnDefs = $scope.fields;
+              }
+              else{
+                console.log('template row')
+                var deferred  = $q.defer();
+
+                if(rowTemplate.length > 0){
+                  controller.grid.getRowTemplateFn = deferred.promise;
+                  deferred.resolve(compiledTemplate);
+                }
+              }
+            });// end watch
+          }
+        },
       };
     }])
 
@@ -71,6 +95,8 @@
     .controller('ctrl', function($scope, $http){
 
       $scope.gridOptions = {};
+      $scope.mobile = true;
+
 
       $http.get('/data/100.json')
       .success(function(data) {
@@ -81,25 +107,35 @@
   </file>
   <file name="index.html">
     <div ng-controller="ctrl">
+      <a ng-click="mobile = !mobile" >toggle</a>
+      mobile view: {{ mobile }}
       <div ui-grid="gridOptions" style="height: 1000px">
 
-        <ui-custom-row ng-if="true">
-          <ui-custom-cell ui-cell-title="Name">
+        <ui-custom-row ui-custom-row-show="!mobile" >
+          <ui-custom-cell ui-custom-cell-title="Name">
             {{ $row.name }}
           </ui-custom-cell>
-          <ui-custom-cell ui-cell-title="M/F">
+
+          <ui-custom-cell ui-custom-cell-title="M/F">
             <span ng-style="($row.gender == 'female')? {color: 'pink'}: {color: 'blue'}">
               {{ $row.name }} is working for {{ $row.company }}
             </span>
           </ui-custom-cell>
         </ui-custom-row>
 
-        <ui-custom-row ng-if="false">
+        <ui-custom-row ui-custom-row-show="mobile">
+          <ui-custom-cell ui-custom-cell-title="Name">
+            {{ $row.name }}
+          </ui-custom-cell>
+
+          </ui-custom-cell>
+
+        </ui-custom-row>
+
+        <ui-custom-row ui-custom-row-show="false">
           <p>{{ $row.name }}!!</p>
         </ui-custom-row>
       </div>
-
-      {{ mobile }}
 
     </div>
   </file>
