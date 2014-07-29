@@ -21,7 +21,7 @@
             var cellTemplate = angular.element('<div>').append(clone).html().trim();
 
             if(cellTemplate.length > 0)
-              template = cellTemplate;
+              template = cellTemplate.replace(/\$row/mg, 'row.entity');
           });
 
           controller.addField(attrs.uiCellTitle, template);
@@ -59,7 +59,7 @@
 
               if(rowTemplate.length > 0){
                 controller.grid.getRowTemplateFn = deferred.promise;
-                deferred.resolve($compile(rowTemplate));
+                deferred.resolve($compile(rowTemplate.replace(/\$row/mg, 'row.entity')));
               }
             }
           }
@@ -85,19 +85,22 @@
 
         <ui-custom-row ng-if="true">
           <ui-custom-cell ui-cell-title="Name">
-            {{ row.entity.name }}
+            {{ $row.name }}
           </ui-custom-cell>
           <ui-custom-cell ui-cell-title="M/F">
-            <span ng-style="(row.entity.gender == 'female')? {color: 'pink'}: {color: 'blue'}">
-              {{ row.entity.name }} is working for {{ row.entity.company }}
+            <span ng-style="($row.gender == 'female')? {color: 'pink'}: {color: 'blue'}">
+              {{ $row.name }} is working for {{ $row.company }}
             </span>
           </ui-custom-cell>
         </ui-custom-row>
 
         <ui-custom-row ng-if="false">
-          <p>{{ row.entity.name }}!!</p>
+          <p>{{ $row.name }}!!</p>
         </ui-custom-row>
       </div>
+
+      {{ mobile }}
+
     </div>
   </file>
 </example>
